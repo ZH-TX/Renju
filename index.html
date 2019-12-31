@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link href="css/style.css" rel="stylesheet">
+    <title>fiveGo</title>
+</head>
+<body>
+    <header>
+        <h1>
+            <div class="github-widget" data-repo="ZH-TX/test"></div>
+        </h1>
+        <div id="newgamebutton" onclick="startGame()" >fiveGo!</div>
+    </header>
+    <canvas id="chess" width="450px" height="450px">五子棋</canvas>
+
+    <footer>
+        ©2020 <a href="#">Airing</a>
+    </footer>
+
+</body>
+<script>
+    var c=document.getElementById("chess");
+    var ctx=c.getContext("2d");
+
+    ctx.font="20px Georgia";
+    ctx.fillText("zhtx出品 AI别名:傻狗",10,50);
+
+    ctx.font="30px Verdana";
+    // 创建渐变
+    var gradient=ctx.createLinearGradient(0,0,c.width,0);
+    gradient.addColorStop("0","magenta");
+    gradient.addColorStop("0.5","blue");
+    gradient.addColorStop("1.0","red");
+    // 用渐变填色
+    ctx.fillStyle=gradient;
+    ctx.fillText("五子棋小游戏",10,100);
+</script>
+
+<script src="js/jquery-2.1.4.min.js"></script>
+<script src="js/jquery.githubRepoWidget.min.js"></script>
+<script src="js/main.js"></script>
+<script src="js/fiveGo.js"></script>
+
+</html>
