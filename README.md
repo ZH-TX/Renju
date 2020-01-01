@@ -1,10 +1,22 @@
-# AiringGo
+# fiveGo
 
-> 五子棋AI实现：[http://ursb.me/AiringGo](http://ursb.me/AiringGo)
+> 五子棋AI实现
 
 ### 技术报告
 - UI：Canvas
 - AI：Javascript
+
+
+### 现阶段支持功能如下
+
+- [√]电脑AI存在一定能力
+- [x]悔棋功能的实现
+- [x]难度梯度的实现
+- [x]提示功能的实现
+- [x]两人对弈的实现
+- [x]算法使用其他方式的实现
+- [x]使用面向对象重构代码的实现
+
 
 ### AI算法
 - 极大极小值搜索算法

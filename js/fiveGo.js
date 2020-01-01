@@ -123,7 +123,6 @@ function fiveGo() {
                 
                 // 如果玩家(i,j)处比目前最优的分数大，则落子在(i,j)处
                 if (myScore[i][j] > max) {
-                    console.log(`我的得分:${myScore[i][j]}`)
                     max = myScore[i][j];
                     u = i;
                     v = j;
@@ -139,7 +138,6 @@ function fiveGo() {
                 // 如果电脑(i,j)处比目前最优的分数大，则落子在(i,j)处
                 if (aiScore[i][j] > max) {
                     
-                    console.log(`AI  得分:${aiScore[i][j]}`);
                     max  = aiScore[i][j];
                     u = i;
                     v = j;
