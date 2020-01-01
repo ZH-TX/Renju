@@ -1,58 +1,75 @@
 /**
- * UI 界面
+ *
  * @author zhtx
  * 
- * 1. 悔棋功能(最重要的一个功能), 提示功能, 优化算法
- * 
+ *  
  */
 
 var canvas = document.getElementById("chess");
 var context = canvas.getContext("2d");
-var me = true;              // 判断该轮黑白棋落子权
+
+var me = true;              // 判断该轮黑白棋落子权(黑棋先下)
 var over = false;           // 判断游戏是否结束
 var chessBoard = [];        // 棋盘二维数组,存储棋盘信息
 
-/**
- * 开始按钮逻辑:初始化棋盘,并让电脑黑棋先行(7,7)位置
- */
-function startGame() {
-    
-    // 初始化棋盘信息二维数组的形式表示
-    for (var i = 0; i < 15; i++) {
-        chessBoard[i] = [];
-        for (var j = 0; j < 15; j++) {
-            chessBoard[i][j] = 0;
-        }
+
+var wins  = [];             // 赢法统计数组
+var count = 0;              // 赢法统计数组的计数器
+
+var myWin = [];
+var aiWin = [];
+
+
+// 初始化   赢法统计数组
+for (var i = 0; i < 15; i++) {
+    wins[i] = [];
+    for (var j = 0; j < 15; j++) {
+        wins[i][j] = []
     }
-    
-    // 清除棋盘
-    cleanChess();
-    // 绘制棋盘
-    drawChess();
-    
-    // 轮到玩家(白棋)行棋
-    me = true;
-    // 重置游戏结束标志
-    over = false;
-    
-    // 初始化赢法统计数组
-    for (var i = 0; i < count; i++) {
-        myWin[i] = 0;
-        aiWin[i] = 0;
-    }
-    
-    // 让电脑先行，(7,7)处绘制黑棋，并存储信息
-    oneStep(7, 7, false);
-    chessBoard[7][7] = 2;   //2 为电脑下的子
 }
 
-/**
- * 清除棋盘
- */
-function cleanChess() {
-    context.fillStyle = "#DCBEA2";
-    context.fillRect(0, 0, canvas.width, canvas.height);
+
+
+// 阳线纵向90°的赢法  S-N (这里只考虑连珠)
+for (var i = 0; i < 15; i++) {
+    for (var j = 0; j < 11; j++) {  //為什麼是十一有點不太理解
+        for (var k = 0; k < 5; k++) {
+            wins[i][j + k][count] = true; // 5子连珠
+        }
+        count++;                    //这里只有11次???
+    }
 }
+
+// 阳线横向0°的赢法  W-E
+for (var i = 0; i < 15; i++) {
+    for (var j = 0; j < 11; j++) {
+        for (var k = 0; k < 5; k++) {
+            wins[j + k][i][count] = true;
+        }
+        count++;
+    }
+}
+
+// 阴线斜向45°的赢法     NE45 (坐标思维)
+for (var i = 0; i < 11; i++) {
+    for (var j = 0; j < 11; j++) {
+        for (var k = 0; k < 5; k++) {
+            wins[i + k][j + k][count] = true;
+        }
+        count++;
+    }
+}
+
+// 阴线斜向135°的赢法   NE135
+for (var i = 0; i < 11; i++) {
+    for (var j = 14; j > 3; j--) {
+        for (var k = 0; k < 5; k++) {
+            wins[i + k][j - k][count] = true;
+        }
+        count++;
+    }
+}
+
 
 /**
  * 绘制棋盘
@@ -79,6 +96,15 @@ function drawChess() {
     }
 }
 
+
+/**
+ * 清除棋盘
+ */
+function cleanChess() {
+    context.fillStyle = "#DCBEA2";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+}
+
 /**
  * 绘制棋子
  * @param i     棋子x轴位置
@@ -90,7 +116,7 @@ function oneStep(i, j ,me) {
     context.arc(15 + i * 30, 15 + j * 30, 13, 0, 2 * Math.PI);
     context.closePath();
     var gradient = context.createRadialGradient(15 + i * 30 + 2, 15 + j * 30 - 2, 13, 15 + i * 30 + 2, 15 + j * 30 - 2, 0);
-    if (me) {
+    if (me) {  //白棋
         // context.textAlign = "center";    
         // context.fillStyle ="red"
         // context.font = "10px serif";
@@ -98,7 +124,7 @@ function oneStep(i, j ,me) {
         gradient.addColorStop(0, "#D1D1D1");
         gradient.addColorStop(1, "#F9F9F9");
        
-    } else {
+    } else {  //黑棋
         gradient.addColorStop(0, "#0A0A0A");
         gradient.addColorStop(1, "#636766");
     }
@@ -106,10 +132,50 @@ function oneStep(i, j ,me) {
     context.fill();
 }
 
+/**
+ * 回退上一步
+ */
+
 
 /**
- * canvas 鼠标点击事件
- * @param e
+ * 开始按钮逻辑:初始化棋盘,并让电脑黑棋先行(7,7)位置
+ */
+function startGame() {
+    
+    // 初始化棋盘信息chessBoard[][] 15x15
+    for (var i = 0; i < 15; i++) {
+        chessBoard[i] = [];
+        for (var j = 0; j < 15; j++) {
+            chessBoard[i][j] = 0;
+        }
+    }
+    
+    cleanChess();  // 清除棋盘
+    drawChess();   // 绘制棋盘
+
+    // 初始化赢法统计数组
+    for (var i = 0; i < count; i++) {
+        myWin[i] = 0;
+        aiWin[i] = 0;     
+    }
+
+    // 让电脑先行，(7,7)处绘制黑棋，2 为电脑(黑)下的子
+    // oneStep(7, 7, false);
+    // chessBoard[7][7] = 2;  //bug
+   
+    fiveGo()
+    
+    me   = true;   // 轮到玩家(白棋)行棋
+    over = false;  // 重置游戏结束标志
+    
+  
+}
+
+
+
+/**
+ * 玩家(白棋点击鼠标下棋)
+ * @param e      鼠标事件
  */
 canvas.onclick = function(e) {
     if (over) {
@@ -121,16 +187,16 @@ canvas.onclick = function(e) {
     var i = Math.floor(x / 30);
     var j = Math.floor(y / 30);
 
-    // 如果该位置没有棋子,则允许落子
+    //  0表示初始状态
     if(chessBoard[i][j] == 0) {
-        // 绘制棋子(玩家)
+
         oneStep(i, j, me);
         // console.log(`我的得分:${fiveGo().myScore}`)
 
-        // 改变棋盘信息(该位置有棋子)   
-        chessBoard[i][j] = 1;      //玩家为赋值为1
+        // 1表示玩家下棋  
+        chessBoard[i][j] = 1;     
 
-        // 遍历赢法统计数组
+        // 遍历赢法统计数组(可以优化在下了5个回合后再统计)
         for (var k = 0; k < count; k++) {
             if (wins[i][j][k]) {
                 // 如果存在赢法,则玩家此赢法胜算+1(赢法为5胜取胜)
@@ -139,6 +205,7 @@ canvas.onclick = function(e) {
                 aiWin[k] = 6;
                 // 玩家落子后,此处赢法数组凑够5,玩家取胜
                 if (myWin[k] == 5) {
+                    window.alert("恭喜你获胜");
                     window.alert("还是你厉害,狗子打不过你");
                     
                     // 游戏结束
@@ -149,75 +216,22 @@ canvas.onclick = function(e) {
         }
         //fiveGo2()
 
-        // 如果游戏没有结束,轮到电脑行棋
+        
         if (!over) {
             me = !me;
             fiveGo();
-            // console.log(`AI  得分:${aiScore[i][j]}`);
+            
         }
     }
 };
 
 
 
-var wins = [];      // 赢法统计数组
-var count = 0;      // 赢法统计数组的计数器
-
-// 初始化    赢法统计数组
-for (var i = 0; i < 15; i++) {
-    wins[i] = [];
-    for (var j = 0; j < 15; j++) {
-        wins[i][j] = []
-    }
-}
-
-var myWin = [];
-var aiWin = [];
-
-// 阳线纵向90°的赢法  S-N
-for (var i = 0; i < 15; i++) {
-    for (var j = 0; j < 11; j++) {  //為什麼是十一有點不太理解
-        for (var k = 0; k < 5; k++) {
-            wins[i][j + k][count] = true; //1
-        }
-        count++;
-    }
-}
-
-// 阳线横向0°的赢法  W-E
-for (var i = 0; i < 15; i++) {
-    for (var j = 0; j < 11; j++) {
-        for (var k = 0; k < 5; k++) {
-            wins[j + k][i][count] = true;
-        }
-        count++;
-    }
-}
-
-// 阴线斜向135°的赢法     NE135
-for (var i = 0; i < 11; i++) {
-    for (var j = 0; j < 11; j++) {
-        for (var k = 0; k < 5; k++) {
-            wins[i + k][j + k][count] = true;
-        }
-        count++;
-    }
-}
-
-// 阴线斜向45°的赢法   NE45
-for (var i = 0; i < 11; i++) {
-    for (var j = 14; j > 3; j--) {
-        for (var k = 0; k < 5; k++) {
-            wins[i + k][j - k][count] = true;
-        }
-        count++;
-    }
-}
-
 /**
  * AI  (这里变量在各个文件中需要小心)
  * 电脑算法  ( 可以分清, 进攻, 与防御两种状态)
  * 1. 这里评分体系还是有些问题, 没有考虑各种活与眠的状态 加入一些状态改变权重
+ * 2. 第一步没有统计
  * 
  * 
  */
@@ -226,12 +240,13 @@ function fiveGo() {
         return;
     }
 
-    var u = 0;              // 电脑预落子的x位置
-    var v = 0;              // 电脑预落子的y位置
-    var myScore = [];       // 玩家的分数
-    var aiScore = [];   // 电脑的分数
-    var max = 0;            // 最优位置的分数
 
+    var u = 7;              // 电脑预落子的x位置
+    var v = 7;              // 电脑预落子的y位置
+    var max = 0;            // 最优位置的分数
+    var myScore = [];       // 玩家的分数
+    var aiScore = [];       // 电脑的分数
+   
     // 初始化分数的二维数组
     for (var i = 0; i < 15; i++) {
         myScore[i] = [];
@@ -241,6 +256,8 @@ function fiveGo() {
             aiScore[i][j] = 0;
         }
     }
+
+   
     // 贪心算法 
     // 通过赢法统计数组为两个二维数组分别计分 (评分体系,没有使用极大/极小值) 有时还是会出错判断体系有问题
     for (var i = 0; i < 15; i++) {
@@ -258,6 +275,7 @@ function fiveGo() {
                         } else if (myWin[k] == 4) {
                             myScore[i][j] += 100000;
                         }
+
                         //ai 计数 (ai先下有优势分值大一些)
                         if (aiWin[k] == 1) {
                             aiScore[i][j] += 35;
@@ -268,13 +286,9 @@ function fiveGo() {
                         } else if (aiWin[k] == 4) {
                             aiScore[i][j] += 800000;
                         }
-
-                        
                     }
                     // console.log(`我的得分:myScore[i][j]`);
                     // console.log(`AI  得分:aiScore[i][j]`);
-                    
-                    
                 }
                 
                 // 如果玩家(i,j)处比目前最优的分数大，则落子在(i,j)处
@@ -309,8 +323,7 @@ function fiveGo() {
        
     }
 
-    oneStep(u, v, false);
-    chessBoard[u][v] = 2;
+   
 
     for (var k = 0; k < count; k++) {
         if (wins[u][v][k]) {
@@ -319,9 +332,14 @@ function fiveGo() {
             if (aiWin[k] === 5) {
                 window.alert("连狗子都打不过, 你吃屎去吧 ");
                 over = true;
+
             }
         }
     }
+
+    oneStep(u, v, false);
+    chessBoard[u][v] = 2;
+
 
     if (!over) {
        me = !me;
