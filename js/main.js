@@ -162,11 +162,13 @@ function startGame() {
     // 让电脑先行，(7,7)处绘制黑棋，2 为电脑(黑)下的子
     // oneStep(7, 7, false);
     // chessBoard[7][7] = 2;  //bug
-   
+
+    over = false;  // 重置游戏结束标志
+    
     fiveGo()
     
     me   = true;   // 轮到玩家(白棋)行棋
-    over = false;  // 重置游戏结束标志
+    
     
   
 }
