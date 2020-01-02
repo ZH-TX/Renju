@@ -8,7 +8,7 @@
 var canvas = document.getElementById("chess");
 var context = canvas.getContext("2d");
 
-var me = true;              // 判断该轮黑白棋落子权(黑棋先下)
+var me = false;              // 判断该轮黑白棋落子权(黑棋先下 :me true 白, false 黑)
 var over = false;           // 判断游戏是否结束
 var chessBoard = [];        // 棋盘二维数组,存储棋盘信息
 
@@ -167,7 +167,7 @@ function startGame() {
     
     fiveGo()
     
-    me   = true;   // 轮到玩家(白棋)行棋
+    // me   = true;   // 轮到玩家(白棋)行棋
     
     
   
@@ -339,7 +339,7 @@ function fiveGo() {
         }
     }
 
-    oneStep(u, v, false);
+    oneStep(u, v, me);
     chessBoard[u][v] = 2;
 
 
