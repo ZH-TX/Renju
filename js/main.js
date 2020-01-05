@@ -12,9 +12,18 @@ let me   = false;           // 判断该轮黑白棋落子权(黑棋先下 :me t
 let over = false;           // 判断游戏是否结束
 let chessBoard = [];        // 棋盘二维数组,存储棋盘信息
 
+let canvasHistory = [];     //保存每一个步骤信息  或者说记录每个地址值
+let step = 0;               //初始值下子为1
+let playList=[];            //每个数组的值(x,y值)
+let newx, newy              //最新x,y 值  
+
+const strokeStyle = "#4E4E4E"  //线条色
+const fillStyle   = "#DCBEA2"  //填充颜色
+
 const PLAYWIN = "恭喜你获胜"
 const PLAYWIN2= "还是你厉害,狗子打不过你"
 const AIWIN   = "连狗子都打不过, 你吃屎去吧"
+const goBackInfo= "还想悔棋, 你想上天吗"
 
 //计分表  white  black
 const WHITE1 =15
@@ -36,15 +45,13 @@ let myWin = [];
 let aiWin = [];
 
 
-// 初始化   赢法统计数组
+// 初始化   赢法统计数组   (所有赢法都写成了true, 实现的不是很好)需改经
 for (let i = 0; i < 15; i++) {
     wins[i] = [];
     for (let j = 0; j < 15; j++) {
         wins[i][j] = []
     }
 }
-
-
 
 // 阳线纵向90°的赢法  S-N (这里只考虑连珠)
 for (let i = 0; i < 15; i++) {
@@ -91,7 +98,8 @@ for (let i = 0; i < 11; i++) {
 
 function drawChess() {
     for (var i = 0; i < 15; i++) {
-        context.strokeStyle = "#4E4E4E";
+        context.strokeStyle = strokeStyle; //边界线条颜色
+        // context.lineWidth=2
 
         context.beginPath();
         context.moveTo(15.5 + i *30, 15);
@@ -111,41 +119,77 @@ function drawChess() {
 // 清除棋盘
 
 function cleanChess() {
-    context.fillStyle = "#DCBEA2";
+    context.fillStyle =fillStyle; ;  //棋盘颜色
     context.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 /**
- * 绘制棋子
- * @param i     棋子x轴位置
- * @param j     棋子y轴位置
+ * 绘制棋子(下棋)
+ * @param i     棋子x轴位置|^
+ * @param j     棋子y轴位置|_____>
  * @param me    棋子颜色
  */
 function oneStep(i, j ,me) {  //能否画出做坐标,以及高亮最后一步, 连珠提示
     context.beginPath();
     context.arc(15 + i * 30, 15 + j * 30, 13, 0, 2 * Math.PI);
-    context.closePath();
-    var gradient = context.createRadialGradient(15 + i * 30 + 2, 15 + j * 30 - 2, 13, 15 + i * 30 + 2, 15 + j * 30 - 2, 0);
+    context.closePath();  //stroke()??
+    let gradient = context.createRadialGradient(15 + i * 30 + 2, 15 + j * 30 - 2, 13, 15 + i * 30 + 2, 15 + j * 30 - 2, 0);
     if (me) {  //白棋
-        // context.textAlign = "center";    
-        // context.fillStyle ="red"
-        // context.font = "10px serif";
-        // context.fillText("21564564", 15 + i * 30, 15 + j * 30);
+        
         gradient.addColorStop(0, "#D1D1D1");
         gradient.addColorStop(1, "#F9F9F9");
-       
+
     } else {  //黑棋
         gradient.addColorStop(0, "#0A0A0A");
         gradient.addColorStop(1, "#636766");
     }
     context.fillStyle = gradient;
-    context.fill();
+    // context.fillStyle = "#DCBEA2";
+    context.fill();  //填充
+    
+
+    playList.push({newx:i,newy:j,me:me}) //false 黑, true 白  
+    step++;                                   //步数加一                            
+    // context.textAlign = "center";    
+    // context.fillStyle ="red"
+    // context.font = "10px serif";
+    // context.fillText(step, 15 + i * 30, 15 + j * 30); //显示步数 
+                                    
+    canvasHistory.push(canvas.toDataURL())  //不是一个明智之举
+    console.log(playList);
+    console.log(canvasHistory);
+    
 }
 
-/**
- * 回退上一步
- */
+//实现悔棋功能 oneStep 同时清空棋盘存储信息 (暂时版)
+function goBack(){
+    // oneStep(i,j,me)  //需要拿到i,j 的值 填充为原来的颜色
+    // chessBoard[i][j] = 0; 
 
+    if (step >0) {       
+        step--;
+
+        newx=playList[step].newx
+        newy=playList[step].newy
+        chessBoard[newx][newy] = 0;   //我chessBorder[][],难道需要记录最新i,j 值
+        playList.pop()
+        canvasHistory.pop()         //需要将myWin, 以及aIWin 的值减一
+       
+        console.log(playList);
+        console.log(canvasHistory);
+
+        this.cleanChess()
+        
+        let canvasPic = new Image();
+        canvasPic.src = canvasHistory[step-1];
+        canvasPic.addEventListener('load', () => {
+        ctx.drawImage(canvasPic, 0, 0);
+        });
+    } else {
+        window.alert(goBackInfo)
+    }
+   
+}
 
 // 开始按钮逻辑:初始化棋盘,并让电脑黑棋先行(7,7)位置
 
@@ -161,6 +205,9 @@ function startGame() {
     
     cleanChess();  // 清除棋盘
     drawChess();   // 绘制棋盘
+
+    playList=[],
+    canvasHistory=[]
 
     // 初始化赢法统计数组
     for (var i = 0; i < count; i++) {
@@ -197,11 +244,13 @@ canvas.onclick = function(e) {
 
     //  0表示初始状态  1 表示玩家下棋  
     if(chessBoard[i][j] == 0) {
+
         oneStep(i, j, me);
         chessBoard[i][j] = 1;     
-
+       
         // 遍历赢法统计数组
         for (var k = 0; k < count; k++) {
+
             if (wins[i][j][k]) {
                 // 如果存在赢法,则玩家此赢法胜算+1(赢法为5胜取胜)
                 myWin[k] ++;
@@ -245,7 +294,7 @@ function fiveGo() {
     var u = 7;              // 电脑预落子的x位置
     var v = 7;              // 电脑预落子的y位置
     var max = 0;            // 最优位置的分数
-    var myScore = [];       // 玩家的分数
+    var myScore = [];       // 玩家的分数(没有具化,以数组保存)
     var aiScore = [];       // 电脑的分数
    
     // 初始化分数的二维数组
@@ -259,7 +308,7 @@ function fiveGo() {
     }
 
    
-    // 贪心算法 
+
     // 通过赢法统计数组为两个二维数组分别计分 (评分体系,没有使用极大/极小值) 可以优化
     for (var i = 0; i < 15; i++) {
         for (var j = 0; j < 15; j++) {
@@ -333,7 +382,7 @@ function fiveGo() {
 
     oneStep(u, v, me);
     chessBoard[u][v] = 2;
-
+ 
     if (!over) {me = !me;}
 
     // return {myScore,aiScore}
