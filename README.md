@@ -1,6 +1,6 @@
 # fiveGo
 
-> 五子棋AI实现
+> 五子棋AI实现 :https://zh-tx.github.io/Renju/
 
 ### 技术报告
 - UI：Canvas
