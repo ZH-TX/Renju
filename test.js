@@ -335,8 +335,8 @@ function fiveGo() {
             aiWin[k] ++;
             myWin[k] = 6;
             if (aiWin[k] === 5) {
-                window.alert("连狗子都打不过, 你吃屎去吧 ");
                 over = true;
+                window.alert("连狗子都打不过, 你吃屎去吧 ");
             }
         }
     }
